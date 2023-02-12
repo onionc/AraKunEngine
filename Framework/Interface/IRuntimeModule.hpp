@@ -3,7 +3,7 @@
 
 // 运行模块
 namespace My {
-    Interface IRuntimeModule{
+    class IRuntimeModule{
         public:
             virtual ~IRuntimeModule() {};
             // 初始化模块
