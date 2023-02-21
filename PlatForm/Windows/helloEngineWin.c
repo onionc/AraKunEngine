@@ -1,8 +1,14 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <tchar.h>
+#include <new>
+
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+typedef struct StateInfo{
+    char a;
+}StateInfo;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow){
     HWND hWnd;
@@ -21,10 +27,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     RegisterClassEx(&wc);
 
+    StateInfo *pState = new (std::nothrow) StateInfo;
     hWnd = CreateWindowEx(0, "WindowClass1", "Hello Engine",
         WS_OVERLAPPEDWINDOW,
         300, 300, 500, 400,
-        NULL, NULL, hInstance, NULL);
+        NULL, NULL, hInstance, pState);
 
     ShowWindow(hWnd, nCmdShow);
 
@@ -49,6 +56,15 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
             FillRect(hdc, &rec, brush);
             EndPaint(hWnd, &ps);
+            break;
+        case WM_KEYDOWN:
+            switch(wParam){
+                case VK_LEFT:
+                    MessageBox(NULL, "test", "zz", MB_OK);
+                    SendMessage (hWnd, WM_PAINT, 32, 0) ;
+                    break;
+            }
+
             break;
         case WM_DESTROY:
             PostQuitMessage(0);
