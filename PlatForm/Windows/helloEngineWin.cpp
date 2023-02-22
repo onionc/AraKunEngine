@@ -46,9 +46,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     return msg.wParam;
 }
 
+StateInfo* GetAppState(HWND hwnd){
+    LONG_PTR ptr = GetWindowLongPtr(hwnd, GWLP_USERDATA);
+    return (StateInfo*)ptr;
+}
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam){
+    // 获取对话框对象
+    StateInfo *pState;
+    if(message == WM_CREATE){
+        CREATESTRUCT *pCreate = (CREATESTRUCT*)lParam;
+        pState = (StateInfo*)(pCreate->lpCreateParams);
+        SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pState);
+    }else{
+        pState = GetAppState(hWnd);
+    }
+
     switch(message){
         case WM_PAINT:
+        {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
             RECT rec = {20,20,60,60};
@@ -56,6 +71,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
             FillRect(hdc, &rec, brush);
             EndPaint(hWnd, &ps);
+        }
             break;
         case WM_KEYDOWN:
             switch(wParam){
