@@ -1,8 +1,7 @@
 #include <windows.h>
-#include <windowsx.h>
-#include <tchar.h>
 #include <new>
 
+#define UNICODE TRUE
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -11,11 +10,9 @@ typedef struct StateInfo{
 }StateInfo;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow){
-    HWND hWnd;
-
-    WNDCLASSEX wc;
-
-    ZeroMemory(&wc, sizeof(WNDCLASSEX));
+    const wchar_t CLASS_NAME[] = L"WindowClass1"; 
+    
+    WNDCLASSEX wc={}; // {} 用默认值初始化结构体
 
     wc.cbSize = sizeof(WNDCLASSEX);
     wc.style = CS_HREDRAW | CS_VREDRAW;
@@ -28,12 +25,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     RegisterClassEx(&wc);
 
     StateInfo *pState = new (std::nothrow) StateInfo;
-    hWnd = CreateWindowEx(0, "WindowClass1", "Hello Engine",
+    HWND hwnd = CreateWindowEx(WS_EX_TRANSPARENT, CLASS_NAME, L"Hello Engine",
         WS_OVERLAPPEDWINDOW,
         300, 300, 500, 400,
         NULL, NULL, hInstance, pState);
 
-    ShowWindow(hWnd, nCmdShow);
+    if(hwnd == NULL) return 0;
+
+    ShowWindow(hwnd, nCmdShow);
 
     MSG msg;
 
