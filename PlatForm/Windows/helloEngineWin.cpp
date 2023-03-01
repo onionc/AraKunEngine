@@ -4,7 +4,7 @@
 #include <iostream>
 
 // 向量
-typedef struct Vec{
+typedef struct VecS{
     float x=0;
     float y=0;
 
@@ -15,12 +15,24 @@ typedef struct Vec{
     }
 }Vec;
 
-LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-void ballUpdate(Vec &pos);
-void move();
+// 矩形，通过左上角（x,y）点和宽高来表示
+typedef struct RectXyS{
+    long x;
+    long y;
+    long w;
+    long h;
+
+    RectXyS(RECT &r){
+        x = r.left;
+        y = r.top;
+        w = r.right - r.left;
+        h = r.bottom - r.top;
+    }
+}RectXy;
+
 
 // 接球板
-static const int width = 50, height = 10, start=0;
+static const int width = 50, height = 10, start=150;
 static RECT board = {start, 300, start+width, 300+height};
 // 小球
 static const int ballSize = 10;
@@ -30,13 +42,19 @@ static RECT ball = {start+width/2-ballR, board.top - ballSize, ball.left+ballSiz
 
 
 // 重力
-Vec g{0,-9.8};
+Vec g{0,-1};
 // 弹力
 Vec bounce;
 // 摩擦力
 Vec force;
 // 系数
-float k=1;
+//float k=1/9.8+1e-3; // 重力作用下的最小x像素运动的系数
+
+
+LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+void ballUpdate(Vec &pos);
+void move();
+bool hitDetection(RECT &rect1, RECT &rect2);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow){
     const TCHAR CLASS_NAME[] = _T("WindowClass1"); 
@@ -63,7 +81,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     ShowWindow(hwnd, nCmdShow);
 
 
-    SetTimer (hwnd, 1, 200, NULL) ;
+    SetTimer (hwnd, 1, 50, NULL) ;
     
     MSG msg;
     while(GetMessage(&msg, NULL, 0, 0)){
@@ -85,12 +103,38 @@ void move(){
     
     // 球移动（在重力和弹力的作用下）
     Vec t{g.x+bounce.x, g.y+bounce.y};
-    t.x *= k;
-    t.y *= k;
+
     ballUpdate(t);
     // 碰撞检测
+    if(hitDetection(ball, board)){
+        // 弹力为两个中心连线向量，方向从board到ball, 大小随机
+        float x = (ball.right+ball.left)/2.0 - (board.right+board.left)/2.0;
+        float y = (ball.bottom+ball.top)/2.0 - (board.bottom+board.top)/2.0;
 
+        float k2 =1;
+        
+ 
+        bounce.x = x*k2;
+        bounce.y = y*k2;
+    }
     // 弹力衰减
+    if(bounce.x>1) bounce.x-=1;
+    if(bounce.y>1) bounce.y-=1;
+}
+// 碰撞检测
+bool hitDetection(RECT &rect1, RECT &rect2){
+    // 碰撞计算
+    if(
+        rect1.left < rect2.right &&
+        rect1.right > rect2.left &&
+        rect1.top < rect2.bottom &&
+        rect1.bottom > rect2.top 
+    ){
+        
+        return true;
+    }
+                
+    return false;
 
 }
 
