@@ -1,7 +1,11 @@
 
 # generated file
 *.exe
+*.log
+*.obj
+.vscode/
 
 # build
 build/
 buildVs/
+
